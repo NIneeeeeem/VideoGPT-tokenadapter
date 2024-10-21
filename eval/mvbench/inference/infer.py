@@ -5,9 +5,17 @@ from videogpt_plus.conversation import conv_templates
 from videogpt_plus.model.builder import load_pretrained_model
 from videogpt_plus.mm_utils import tokenizer_image_token, get_model_name_from_path
 from eval.mvbench.inference.ddp import *
-from torch.utils.data import DataLoader, DistributedSampler
+from torch.utils.data import DataLoader, DistributedSampler, SequentialSampler
 import traceback
-
+from calflops import calculate_flops
+# import debugpy
+# try:
+#     # 5678 is the default attach port in the VS Code debug configurations. Unless a host and port are specified, host defaults to 127.0.0.1
+#     debugpy.listen(("localhost", 9566))
+#     print("Waiting for debugger attach")
+#     debugpy.wait_for_client()
+# except Exception as e:
+#     print(e)
 
 def disable_torch_init():
     """
@@ -69,7 +77,8 @@ def eval_model(args):
 
     dataset = EvalDatasetMvBench(args.question_dir, args.video_folder, image_processor,
                                  video_processor, mvbench_data_list)
-    distributed_sampler = DistributedSampler(dataset, rank=args.rank, shuffle=False)
+    # distributed_sampler = DistributedSampler(dataset, rank=args.rank, shuffle=False)
+    distributed_sampler = SequentialSampler(dataset)
     dataloader = DataLoader(dataset, batch_size=args.batch_size_per_gpu, num_workers=4, sampler=distributed_sampler)
 
     for (idx, sample_set, video_frames, context_frames, slice_len) in tqdm(dataloader):
@@ -95,7 +104,21 @@ def eval_model(args):
                                               return_tensors='pt').unsqueeze(0).cuda()
 
             # stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
-            stop_str = "<|end|>"
+            stop_str = "<|im_end|>"
+            if False: # calculate flops
+                attention_mask = torch.ones(1, input_ids.size(1)).cuda()
+                inputs = {
+                    "input_ids": input_ids,
+                    "images": torch.cat(video_frames, dim=0).half().cuda(),
+                    "context_images": torch.cat(context_frames, dim=0).half().cuda(),
+                    # "input_ids_caps": cap_input_ids,
+                    "attention_mask": attention_mask
+                }
+                flops, macs, params = calculate_flops(model=model,
+                                        kwargs = inputs,
+                                        print_results=True)
+                print("[Our Model] FLOPs:%s   MACs:%s   Params:%s \n" %(flops, macs, params))
+            # import pdb; pdb.set_trace()
 
             with torch.inference_mode():
                 output_ids = model.generate(
@@ -107,7 +130,9 @@ def eval_model(args):
                     top_p=args.top_p,
                     num_beams=args.num_beams,
                     max_new_tokens=1024,
-                    use_cache=True)
+                    use_cache=True,
+                    repetition_penalty = 1.0
+                    )
 
             input_token_len = input_ids.shape[1]
             n_diff_input_output = (input_ids != output_ids[:, :input_token_len]).sum().item()
@@ -118,9 +143,9 @@ def eval_model(args):
             if outputs.endswith(stop_str):
                 outputs = outputs[:-len(stop_str)]
             outputs = outputs.strip()
-            outputs = outputs.replace("<|end|>", '')
+            outputs = outputs.replace("<|im_end|>", '')
             outputs = outputs.strip()
-
+            print(outputs)
             ans_id = shortuuid.uuid()
             video_json_name = sample['video_name'][0].replace('/', '_')
             if len(video_json_name) > 100:
@@ -144,11 +169,11 @@ def eval_model(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-path", type=str, default="MBZUAI/VideoGPT-plus_Phi3-mini-4k/mvbench")
-    parser.add_argument("--model-base", type=str, default="microsoft/Phi-3-mini-4k-instruct")
-    parser.add_argument("--video-folder", type=str, default="OpenGVLab/MVBench/video")
-    parser.add_argument("--question-dir", type=str, default="OpenGVLab/MVBench/json")
-    parser.add_argument("--output-dir", type=str, default="MBZUAI/VideoGPT-plus_Phi3-mini-4k/mvbench_eval")
+    parser.add_argument("--model-path", type=str, default=".cache/VideoGPT-plus_Phi3-mini-4k/mvbench")
+    parser.add_argument("--model-base", type=str, default=".cache/Phi-3-mini-4k-instruct")
+    parser.add_argument("--video-folder", type=str, default=".cache/MVBench/video")
+    parser.add_argument("--question-dir", type=str, default=".cache/MVBench/json")
+    parser.add_argument("--output-dir", type=str, default="json_result/VideoGPT-plus_Phi3-mini-4k/mvbench_eval")
     parser.add_argument("--conv-mode", type=str, default="phi3_instruct")
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--top_p", type=float, default=None)

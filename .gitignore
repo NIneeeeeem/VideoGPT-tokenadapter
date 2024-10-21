@@ -1,0 +1,7 @@
+*.log
+.vscode
+.cache
+openai
+OpenGVLab
+json_result
+results

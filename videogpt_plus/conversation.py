@@ -9,6 +9,8 @@ class SeparatorStyle(Enum):
     TWO = auto()
     MPT = auto()
     PLAIN = auto()
+    CHATML = auto()
+    QWEN2 = auto()
 
 
 @dataclasses.dataclass
@@ -76,6 +78,26 @@ class Conversation:
                     ret += message + seps[i % 2]
                 else:
                     ret += ""
+        elif self.sep_style == SeparatorStyle.CHATML:
+            ret = "" if self.system == "" else self.system + self.sep + "\n"
+            for role, message in messages:
+                if message:
+                    if type(message) is tuple:
+                        message, images, _ = message
+                        message = "<image>" * len(images) + message
+                    ret += role + "\n" + message + self.sep + "\n"
+                else:
+                    ret += role + "\n"
+        # elif self.sep_style == SeparatorStyle.QWEN2:
+        #     seps = [self.sep, self.sep2]
+        #     ret = self.system + seps[0]
+        #     for i, (role, message) in enumerate(messages):
+        #         if message:
+        #             if type(message) is tuple:
+        #                 message, _, _ = message
+        #             ret += role + ": " + message + seps[i % 2]
+        #         else:
+        #             ret += role + ":"
         else:
             raise ValueError(f"Invalid style: {self.sep_style}")
 
@@ -131,6 +153,31 @@ conv_phi3_instruct = Conversation(
     sep="<|end|>",
 )
 
+# from https://github.com/OpenGVLab/InternVL/blob/main/internvl_chat/internvl/conversation.py
+# internlm2-chat
+conv_qwen2_cap = Conversation(
+    system="""<|im_start|>system\nYou are a helpful AI assistant.""",
+    roles=('<|im_start|>user\n', '<|im_start|>assistant\n'),
+    version="qwen2",
+    messages=(),
+    offset=0,
+    sep_style=SeparatorStyle.MPT,
+    sep='<|im_end|>',
+)
+# https://github.com/haotian-liu/LLaVA/pull/1573/files and 
+# https://github.com/haotian-liu/LLaVA/issues/1153#issuecomment-1956308533
+# conv_qwen2_cap = Conversation(
+#     system="A chat between a curious user and an artificial intelligence assistant. "
+#     "The assistant gives helpful, detailed, and polite answers to the user's questions.",
+#     roles=("USER", "ASSISTANT"),
+#     version="qwen_v2",
+#     messages=(),
+#     offset=0,
+#     sep_style=SeparatorStyle.QWEN2,
+#     sep=" ",
+#     sep2="<|endoftext|>",
+# )
+
 # Should be used for LLaMA-3 models
 conv_llama3 = Conversation(
     system="""<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nA chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions.""",
@@ -142,12 +189,13 @@ conv_llama3 = Conversation(
     sep="<|eot_id|>",
 )
 
-default_conversation = conv_phi3_instruct
+default_conversation = conv_qwen2_cap
 conv_templates = {
     "default": conv_phi3_instruct,
     "plain": conv_plain,
     "v1": conv_v1,
     "phi3_instruct": conv_phi3_instruct,
+    "qwen2_cap": conv_qwen2_cap,
 }
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 import os
 
-DATASET_DIR = os.environ.get("DATASET_DIR", "playground/data")
+# DATASET_DIR = os.environ.get("DATASET_DIR", "playground/data")
+DATASET_DIR = os.environ.get("DATASET_DIR", ".cache/instruction_data")
 
 CC3M_595K = {
     "annotation_path": f"{DATASET_DIR}/pretraining/CC3M-595K/chat.json",
@@ -75,4 +76,64 @@ REASONING_CLEVRER_MC = {
 VQA_WEBVID_QA = {
     "annotation_path": f"{DATASET_DIR}/annotations/vqa_webvid_qa.json",
     "data_path": f"{DATASET_DIR}/instruction_tuning/webvid",
+}
+
+# ===================== here for vqa cap sub dataset ========================
+REASONING_NExTQA_vqa_sub = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann_sub_video/reasoning_next_qa_sub.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/NExTQA",
+}
+REASONING_CLEVRER_QA_vqa_sub = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann_sub_video/reasoning_clevrer_qa_sub.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/clevrer",
+}
+REASONING_CLEVRER_MC_vqa_sub = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann_sub_video/reasoning_clevrer_mc_sub.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/clevrer",
+}
+VQA_WEBVID_QA_vqa_sub = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann_sub_video/vqa_webvid_qa_sub.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/webvid",
+}
+CLASSIFICATION_K710_vqa_sub = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann_sub_video/classification_k710_sub.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/k710",
+}
+CLASSIFICATION_SSV2_vqa_sub = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann_sub_video/classification_ssv2_sub.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/ssv2",
+}
+CONV_VideoChatGPT_vqa_sub = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann_sub_video/conversation_videochatgpt_sub.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/Activity_Videos",
+}
+
+# ===================== here for vqa cap dataset ========================
+REASONING_NExTQA_vqa = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann/reasoning_next_qa.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/NExTQA",
+}
+REASONING_CLEVRER_QA_vqa = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann/reasoning_clevrer_qa.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/clevrer",
+}
+REASONING_CLEVRER_MC_vqa = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann/reasoning_clevrer_mc.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/clevrer",
+}
+VQA_WEBVID_QA_vqa = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann/vqa_webvid_qa.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/webvid",
+}
+CLASSIFICATION_K710_vqa = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann/classification_k710.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/k710",
+}
+CLASSIFICATION_SSV2_vqa = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann/classification_ssv2.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/ssv2",
+}
+CONV_VideoChatGPT_vqa = {
+    "annotation_path": f"{DATASET_DIR}/merged_cap_vqa_ann/conversation_videochatgpt.json",
+    "data_path": f"{DATASET_DIR}/instruction_tuning/Activity_Videos",
 }

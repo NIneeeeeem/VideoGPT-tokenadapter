@@ -35,16 +35,6 @@ import random
 import numpy as np
 from videogpt_plus.model.dataloader import _get_rawvideo_dec
 
-# import debugpy
-# try:
-#     # 5678 is the default attach port in the VS Code debug configurations. Unless a host and port are specified, host defaults to 127.0.0.1
-#     debugpy.listen(("localhost", 9566))
-#     print("Waiting for debugger attach")
-#     debugpy.wait_for_client()
-# except Exception as e:
-#     print(e)
-# local_rank = None
-
 local_rank = None
 
 
@@ -456,9 +446,6 @@ def preprocess_phi3(
         for j, sentence in enumerate(source):
             role = roles[sentence["from"]]
             assert role == conv.roles[j % 2], f"{i}"
-            # TODO: 该数据集
-            # if role == conv.roles[0]:
-            #     sentence["value"] = "<video>\n"+sentence["value"]
             conv.append_message(role, sentence["value"])
         conversations.append(conv.get_prompt())
 
@@ -530,119 +517,6 @@ def preprocess_phi3(
         input_ids=input_ids,
         labels=targets,
     )
-    
-    
-def preprocess_qwen2(
-        sources,
-        tokenizer: transformers.PreTrainedTokenizer,
-        has_image: bool = False
-) -> Dict:
-    conv = conversation_lib.conv_qwen2_cap.copy()
-    roles = {"human": conv.roles[0], "gpt": conv.roles[1]}
-
-    # Apply prompt templates
-    conversations = []
-    for i, source in enumerate(sources):
-        if roles[source[0]["from"]] != conv.roles[0]:
-            # Skip the first one if it is not from human
-            source = source[1:]
-
-        conv.messages = []
-        for j, sentence in enumerate(source):
-            role = roles[sentence["from"]]
-            assert role == conv.roles[j % 2], f"{i}"
-            conv.append_message(role, sentence["value"])
-        conversations.append(conv.get_prompt())
-
-    # Tokenize conversations
-
-    if has_image:
-        tensor_list = [tokenizer_image_token(prompt, tokenizer, return_tensors='pt') for prompt in conversations]
-        max_length = max(tensor.shape[0] for tensor in tensor_list)
-        input_ids = torch.stack([torch.cat((tensor, torch.full((max_length - len(tensor), *tensor.shape[1:]), tokenizer.pad_token_id))) for tensor in tensor_list], dim=0)
-        # input_ids = torch.stack(
-        #     [tokenizer_image_token(prompt, tokenizer, return_tensors='pt') for prompt in conversations], dim=0)
-    else:
-        input_ids = tokenizer(
-            conversations,
-            return_tensors="pt",
-            padding="longest",
-            max_length=tokenizer.model_max_length,
-            truncation=True,
-        ).input_ids
-
-    targets = input_ids.clone()
-    # assert conv.sep_style == conversation_lib.SeparatorStyle.QWEN2
-
-    # Mask targets
-    sep = conv.sep + conv.roles[1]
-    # sep = conv.sep + conv.roles[1] + ":"
-    for conversation, target in zip(conversations, targets):
-        total_len = int(target.ne(tokenizer.pad_token_id).sum())
-
-        rounds = conversation.split(conv.sep) # 按照conv.sep + conv.roles[1] + ": " " Assitant: " 划分a'l
-        re_rounds = [conv.sep.join(rounds[:3])]  # system + user + gpt
-        for conv_idx in range(3, len(rounds), 2):
-            re_rounds.append(conv.sep.join(rounds[conv_idx:conv_idx + 2]))  # user + gpt
-        cur_len = 0
-        # target[:cur_len] = IGNORE_INDEX
-        # rounds_len = len(rounds)
-        for i, rou in enumerate(re_rounds):
-            if rou == "":
-                break
-
-            parts = rou.split(sep)
-            if len(parts) != 2:
-                break
-            parts[0] += sep
-
-            if has_image:
-                round_len = len(tokenizer_image_token(rou, tokenizer))
-                instruction_len = len(tokenizer_image_token(parts[0], tokenizer)) - 1
-            else:
-                round_len = len(tokenizer(rou).input_ids)
-                instruction_len = len(tokenizer(parts[0]).input_ids) - 1
-            # if has_image:
-            #     round_ids = tokenizer_image_token(rou, tokenizer)
-            #     instruction_ids = tokenizer_image_token(parts[0], tokenizer)
-            #     equal_parts = [x == y for x, y in zip(round_ids, instruction_ids)]
-
-            #     instruction_len = equal_parts.index(False) if False in equal_parts else len(equal_parts)
-            #     round_len = len(round_ids)
-
-            # else:
-            #     round_ids = tokenizer(rou).input_ids
-            #     instruction_ids = tokenizer(parts[0]).input_ids
-            #     equal_parts = [x == y for x, y in zip(round_ids, instruction_ids)]
-
-            #     instruction_len = equal_parts.index(False) if False in equal_parts else len(equal_parts)
-            #     round_len = len(round_ids)
-
-            if i == 0:
-                round_len += 1
-                instruction_len += 1
-            else:
-                round_len -= 2
-                instruction_len -= 2
-
-            target[cur_len: cur_len + instruction_len] = IGNORE_INDEX
-
-            cur_len += round_len
-        target[cur_len:] = IGNORE_INDEX
-
-        if cur_len < tokenizer.model_max_length:
-            if cur_len != total_len:
-                target[:] = IGNORE_INDEX
-                print(
-                    f"WARNING: tokenization mismatch: {cur_len} vs. {total_len}."
-                    f" (ignored)"
-                )
-
-    return dict(
-        input_ids=input_ids,
-        labels=targets,
-    )
-
 
 
 def preprocess_plain(
@@ -679,7 +553,6 @@ def preprocess(
     3. Tokenize the concatenated conversation;
     4. Make a deepcopy as the target. Mask human words with IGNORE_INDEX.
     """
-    return preprocess_qwen2(sources, tokenizer, has_image=has_image)
     if conversation_lib.default_conversation.sep_style == conversation_lib.SeparatorStyle.PLAIN:
         return preprocess_plain(sources, tokenizer)
     if conversation_lib.default_conversation.version.startswith("v1"):
@@ -954,8 +827,7 @@ def train():
     if model_args.vision_tower is not None:
         model_args.vision_tower = f"{model_args.vision_tower}/InternVideo2-stage2_1b-224p-f4.pt"
 
-    # model = VideoGPTPlusPhi3ForCausalLM.from_pretrained(
-    model = VideoQWENForCausalLM.from_pretrained(
+    model = VideoGPTPlusPhi3ForCausalLM.from_pretrained(
         model_args.model_name_or_path,
         cache_dir=training_args.cache_dir,
         attn_implementation="flash_attention_2",

@@ -1,27 +1,26 @@
 #!/bin/sh
+# 该脚本随机初始化权重，用vcap数据微调 projector 和 lora
 
 export DATASET_DIR=.cache/instruction_data
 
-BASE_LLM_PATH=microsoft/Phi-3-mini-4k-instruct
+BASE_LLM_PATH=.cache/Phi-3-mini-4k-instruct
 VISION_TOWER=OpenGVLab/InternVideo2-Stage2_1B-224p-f4
 IMAGE_VISION_TOWER=openai/clip-vit-large-patch14-336
 PROJECTOR_TYPE=mlp2x_gelu
-PRETRAIN_VIDEO_MLP_PATH=MBZUAI/VideoGPT-plus_Phi3-mini-4k_Pretrain/mlp2x_gelu_internvideo2/mm_projector.bin
-PRETRAIN_IMAGE_MLP_PATH=MBZUAI/VideoGPT-plus_Phi3-mini-4k_Pretrain/mlp2x_gelu_clip_l14_336px/mm_projector.bin
-OUTPUT_DIR_PATH=results/videogpt_plus_finetune
+PRETRAIN_VIDEO_MLP_PATH=.cache/VideoGPT-plus_Phi3-mini-4k_Pretrain/mlp2x_gelu_internvideo2/mm_projector.bin
+PRETRAIN_IMAGE_MLP_PATH=.cache/VideoGPT-plus_Phi3-mini-4k_Pretrain/mlp2x_gelu_clip_l14_336px/mm_projector.bin
+OUTPUT_DIR_PATH=results/pretrain_vcap
 
-deepspeed videogpt_plus/train/train.py \
+deepspeed videogpt_plus/train/train_cap.py \
 --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
 --deepspeed scripts/zero3.json \
 --model_name_or_path "$BASE_LLM_PATH" \
 --version phi3_instruct \
---dataset_use FINETUNING \
+--dataset_use MVBench_capvqa \
 --vision_tower "$VISION_TOWER" \
 --image_vision_tower "$IMAGE_VISION_TOWER" \
 --mm_projector_type "$PROJECTOR_TYPE" \
 --image_mm_projector_type "$PROJECTOR_TYPE" \
---pretrain_mm_mlp_adapter "$PRETRAIN_VIDEO_MLP_PATH" \
---pretrain_image_mm_mlp_adapter "$PRETRAIN_IMAGE_MLP_PATH" \
 --mm_vision_select_layer -2 \
 --mm_use_im_start_end False \
 --mm_use_im_patch_token False \
@@ -47,4 +46,6 @@ deepspeed videogpt_plus/train/train.py \
 --gradient_checkpointing True \
 --dataloader_num_workers 4 \
 --lazy_preprocess True \
---report_to none
+--report_to none \
+# --pretrain_mm_mlp_adapter "$PRETRAIN_VIDEO_MLP_PATH" \
+# --pretrain_image_mm_mlp_adapter "$PRETRAIN_IMAGE_MLP_PATH" \

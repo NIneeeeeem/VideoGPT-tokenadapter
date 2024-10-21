@@ -155,12 +155,15 @@ class VideoGPTPlusMetaForCausalLM(ABC):
         if input_type == "video":
             video_features = self.get_model().mm_projector(video_features)
             video_features = rearrange(video_features, 'b (t l) d -> (b t) l d', t=4)  # t=4 - chunk size
-            video_features = apply_adaptive_avg_pooling(video_features, shape=(8, 8))  # Feature pooling from 256 to 64
+            # video_features = apply_adaptive_avg_pooling(video_features, shape=(8, 8))  # Feature pooling from 256 to 64
+            video_features = apply_adaptive_avg_pooling(video_features, shape=(2, 2))  # Feature pooling from 256 to 64
             video_features = rearrange(video_features, '(b t) l d -> b (t l) d', t=4)  # t=4 - chunk size
 
             context_image_features = self.get_model().image_mm_projector(context_features)
+            # context_image_features = apply_adaptive_avg_pooling(context_image_features,
+            #                                                     shape=(12, 12))  # Feature pooling from 576 to 144
             context_image_features = apply_adaptive_avg_pooling(context_image_features,
-                                                                shape=(12, 12))  # Feature pooling from 576 to 144
+                                                                shape=(3, 3))  # Feature pooling from 576 to 144
             context_image_features = rearrange(context_image_features, '(b t) l d -> b (t l) d',
                                                b=video_features.shape[0])
 

@@ -1,21 +1,30 @@
 #!/bin/sh
 
+GPUS=$1
 export DATASET_DIR=.cache/instruction_data
 
-BASE_LLM_PATH=microsoft/Phi-3-mini-4k-instruct
-VISION_TOWER=OpenGVLab/InternVideo2-Stage2_1B-224p-f4
-IMAGE_VISION_TOWER=openai/clip-vit-large-patch14-336
-PROJECTOR_TYPE=mlp2x_gelu
-PRETRAIN_VIDEO_MLP_PATH=MBZUAI/VideoGPT-plus_Phi3-mini-4k_Pretrain/mlp2x_gelu_internvideo2/mm_projector.bin
-PRETRAIN_IMAGE_MLP_PATH=MBZUAI/VideoGPT-plus_Phi3-mini-4k_Pretrain/mlp2x_gelu_clip_l14_336px/mm_projector.bin
-OUTPUT_DIR_PATH=results/videogpt_plus_finetune
+source activate videogpt
 
-deepspeed videogpt_plus/train/train.py \
+# 切换工作目录
+cd /hhd2/wxc/VideoGPT-plus
+
+# 设置PYTHONPATH环境变量
+export PYTHONPATH="/hhd2/wxc/VideoGPT-plus:$PYTHONPATH"
+
+BASE_LLM_PATH=.cache/qwen2_5/1.5b_instruction
+VISION_TOWER=.cache/InternVideo2-Stage2_1B-224p-f4
+IMAGE_VISION_TOWER=.cache/clip-vit-large-patch14-336
+PROJECTOR_TYPE=mlp2x_gelu
+PRETRAIN_VIDEO_MLP_PATH=results/pretrain/mlp2x_gelu_internvideo2/mm_projector.bin
+PRETRAIN_IMAGE_MLP_PATH=results/pretrain/mlp2x_gelu_clip_l14_336px/mm_projector.bin
+OUTPUT_DIR_PATH=results/finetune_qwen1b_baseline_sub_pool8
+
+deepspeed --include localhost:${GPUS} --master_port 35382 videogpt_plus/train/train.py \
 --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
 --deepspeed scripts/zero3.json \
 --model_name_or_path "$BASE_LLM_PATH" \
 --version phi3_instruct \
---dataset_use FINETUNING \
+--dataset_use MVBench_capvqa_sub \
 --vision_tower "$VISION_TOWER" \
 --image_vision_tower "$IMAGE_VISION_TOWER" \
 --mm_projector_type "$PROJECTOR_TYPE" \
@@ -30,9 +39,9 @@ deepspeed videogpt_plus/train/train.py \
 --bf16 True \
 --output_dir $OUTPUT_DIR_PATH \
 --num_train_epochs 1 \
---per_device_train_batch_size 8 \
+--per_device_train_batch_size 4 \
 --per_device_eval_batch_size 4 \
---gradient_accumulation_steps 2 \
+--gradient_accumulation_steps 8 \
 --evaluation_strategy "no" \
 --save_strategy "steps" \
 --save_steps 50000 \
