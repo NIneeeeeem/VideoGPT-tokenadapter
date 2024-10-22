@@ -18,7 +18,7 @@ OpenGVLab/InternVideo2-Stage2_1B-224p-f4
 
 Qwen/Qwen2.5-1.5B-Instruct
 
-[TODO] projector权重待上传新版
+Wangxc1000/qwen2.5_1.5B_projectors  [projector权重新版]
 
 ~~Wangxc1000/Training_caps_data 【正在上传】包含caption标注的信息~~
 
@@ -31,7 +31,7 @@ bash hfd.sh MBZUAI/VideoGPT-plus_Training_Dataset
 
 torch 实验室 2.4.0+cu118
 
-需要单独下载 flash-attn （实验室版本2.6.3）
+需要单独下载 flash-attn ~~（实验室版本2.6.3）~~ pip install flash-attn --no-build-isolation
 
 其他 pip install -r requirements.txt 即可
 
@@ -53,16 +53,6 @@ image_feature: shape=(divide_and_round(24, pool_level), divide_and_round(24, poo
 ```
 
 pool1 即 b=1 表示不进行 pool
-
-```python
-BASE_LLM_PATH=.cache/qwen2_5/1.5b_instruction 
-VISION_TOWER=.cache/InternVideo2-Stage2_1B-224p-f4
-IMAGE_VISION_TOWER=.cache/clip-vit-large-patch14-336
-PROJECTOR_TYPE=mlp2x_gelu
-PRETRAIN_VIDEO_MLP_PATH=results/pretrain/mlp2x_gelu_internvideo2/mm_projector.bin
-PRETRAIN_IMAGE_MLP_PATH=results/pretrain/mlp2x_gelu_clip_l14_336px/mm_projector.bin
-OUTPUT_DIR_PATH=results/pool_full/finetune_qwen1b_poolbranch_pool1
-```
 
 测试脚本位置 scripts/eval_pool_full
 
