@@ -3,12 +3,7 @@
 GPUS=$1
 export DATASET_DIR=.cache/instruction_data
 
-source activate videogpt
-
-# 切换工作目录
-cd /hhd2/wxc/VideoGPT-plus
-
-# 设置PYTHONPATH环境变量
+# 设置PYTHONPATH环境变量,change here
 export PYTHONPATH="/hhd2/wxc/VideoGPT-plus:$PYTHONPATH"
 
 BASE_LLM_PATH=.cache/qwen2_5/1.5b_instruction
@@ -17,13 +12,15 @@ IMAGE_VISION_TOWER=.cache/clip-vit-large-patch14-336
 PROJECTOR_TYPE=mlp2x_gelu
 PRETRAIN_VIDEO_MLP_PATH=results/pretrain/mlp2x_gelu_internvideo2/mm_projector.bin
 PRETRAIN_IMAGE_MLP_PATH=results/pretrain/mlp2x_gelu_clip_l14_336px/mm_projector.bin
-OUTPUT_DIR_PATH=results/pool_full/finetune_qwen1b_poolbranch_pool4
+OUTPUT_DIR_PATH=results/pool_full/finetune_qwen1b_poolbranch_pool2
 
+# pool_level 用于调节 pool 层，进而调整 visual token 数量
 deepspeed --include localhost:${GPUS} --master_port 35381 videogpt_plus/train/train.py \
 --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
 --deepspeed scripts/zero3.json \
 --model_name_or_path "$BASE_LLM_PATH" \
 --version conv_qwen2_cap \
+--pool_level 2 \
 --dataset_use MVBench_FINETUNING \
 --vision_tower "$VISION_TOWER" \
 --image_vision_tower "$IMAGE_VISION_TOWER" \

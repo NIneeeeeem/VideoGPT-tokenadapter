@@ -151,19 +151,25 @@ class VideoGPTPlusMetaForCausalLM(ABC):
         x = x + p[:, :x.shape[1], :].to(x.device).to(x.dtype)
         return x
 
-    def project(self, video_features, context_features=None, input_type="image"):
+    def project(self, video_features, context_features=None, input_type="image",pool_level=2):
+        def divide_and_round(a, b):
+            result = a / b
+            if result < 1:
+                return 1
+            else:
+                return round(result)
         if input_type == "video":
             video_features = self.get_model().mm_projector(video_features)
             video_features = rearrange(video_features, 'b (t l) d -> (b t) l d', t=4)  # t=4 - chunk size
             # video_features = apply_adaptive_avg_pooling(video_features, shape=(8, 8))  # Feature pooling from 256 to 64
-            video_features = apply_adaptive_avg_pooling(video_features, shape=(2, 2))  # Feature pooling from 256 to 64
+            video_features = apply_adaptive_avg_pooling(video_features, shape=(divide_and_round(16, pool_level), divide_and_round(16, pool_level)))  # Feature pooling from 256 to 64
             video_features = rearrange(video_features, '(b t) l d -> b (t l) d', t=4)  # t=4 - chunk size
 
             context_image_features = self.get_model().image_mm_projector(context_features)
             # context_image_features = apply_adaptive_avg_pooling(context_image_features,
             #                                                     shape=(12, 12))  # Feature pooling from 576 to 144
             context_image_features = apply_adaptive_avg_pooling(context_image_features,
-                                                                shape=(3, 3))  # Feature pooling from 576 to 144
+                                                                shape=(divide_and_round(24, pool_level), divide_and_round(24, pool_level)))  # Feature pooling from 576 to 144
             context_image_features = rearrange(context_image_features, '(b t) l d -> b (t l) d',
                                                b=video_features.shape[0])
 
@@ -254,7 +260,7 @@ class VideoGPTPlusMetaForCausalLM(ABC):
                     if len(i) > 2:
                         cur_image_features = torch.stack(cur_image_features, dim=0)
                         cur_image_features = self.project(cur_image_features, context_features[batch_idx],
-                                                          input_type="video")
+                                                          input_type="video",pool_level=self.config.pool_level)
                         t, l, n = cur_image_features.size()
                         cur_image_features = cur_image_features.contiguous().view(t * l, n)
                     else:

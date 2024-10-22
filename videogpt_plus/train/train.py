@@ -71,6 +71,7 @@ class ModelArguments:
     mm_projector_type: Optional[str] = field(default='mlp2x_gelu')
     image_mm_projector_type: Optional[str] = field(default='mlp2x_gelu')
     mm_use_box_start_end: bool = field(default=False)
+    pool_level: int = field(default=2)
 
 
 @dataclass
@@ -1055,6 +1056,7 @@ def train():
         model.get_model().image_mm_projector.to(dtype=compute_dtype, device=training_args.device)
 
     model.config.mm_projector_lr = training_args.mm_projector_lr
+    model.config.pool_level = model_args.pool_level
 
     model.config.mm_use_im_start_end = data_args.mm_use_im_start_end = model_args.mm_use_im_start_end
     training_args.use_im_start_end = model_args.mm_use_im_start_end
