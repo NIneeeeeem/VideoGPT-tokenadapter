@@ -1,84 +1,75 @@
-# VideoGPT+ :movie_camera: :speech_balloon:
+# ReadMe
 
-<p align="center">
-  <img src="docs/images/videogpt_plus_face.jpeg" alt="videogpt_plus_face" width="200">
-</p>
+EXP. VideoGPT+ 在不同pool上表现 llm使用 qwen2.5 1.5B/~~3B~~
 
-<p align="center">
-    <img src="https://i.imgur.com/waxVImv.png" alt="Oryx Video-ChatGPT">
-</p>
+代码 [https://github.com/NIneeeeeem/VideoGPT-tokenadapter.git](https://github.com/NIneeeeeem/VideoGPT-tokenadapter.git)
 
-### VideoGPT+: Integrating Image and Video Encoders for Enhanced Video Understanding
+关于数据下载 : [huggingface]
 
-#### [Muhammad Maaz](https://www.muhammadmaaz.com) , [Hanoona Rasheed](https://www.hanoonarasheed.com/) , [Salman Khan](https://salman-h-khan.github.io/) and [Fahad Khan](https://sites.google.com/view/fahadkhans/home)
+MBZUAI/VideoGPT-plus_Training_Dataset 【包含了videos和原本的annotions】
 
-#### **Mohamed bin Zayed University of Artificial Intelligence**
+OpenGVLab/MVBench 【包含MVBENCH标注和视频】
 
----
+模型权重下载 : [huggingface]
 
-[![paper](https://img.shields.io/badge/arXiv-Paper-blue.svg)](https://arxiv.org/abs/2406.09418)
-[![video](https://img.shields.io/badge/Project-HuggingFace-F9D371)](https://huggingface.co/collections/MBZUAI/videogpt-665c8643221dda4987a67d8d)
-[![Dataset](https://img.shields.io/badge/VCGBench-Diverse-green)](https://huggingface.co/datasets/MBZUAI/VCGBench-Diverse)
-[![Demo](https://img.shields.io/badge/Annotation-Pipeline-red)](https://huggingface.co/datasets/MBZUAI/video_annotation_pipeline)
+openai/clip-vit-large-patch14-336
 
----
-**Diverse Video-based Generative Performance Benchmarking (VCGBench-Diverse)**
+OpenGVLab/InternVideo2-Stage2_1B-224p-f4
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/videogpt-integrating-image-and-video-encoders/vcgbench-diverse-on-videoinstruct)](https://paperswithcode.com/sota/vcgbench-diverse-on-videoinstruct?p=videogpt-integrating-image-and-video-encoders)
+Qwen/Qwen2.5-1.5B-Instruct
 
-**Video Question Answering on MVBench**
+[TODO] projector权重待上传新版
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/videogpt-integrating-image-and-video-encoders/video-question-answering-on-mvbench)](https://paperswithcode.com/sota/video-question-answering-on-mvbench?p=videogpt-integrating-image-and-video-encoders)
+~~Wangxc1000/Training_caps_data 【正在上传】包含caption标注的信息~~
+
+```python
+export HF_ENDPOINT=https://hf-mirror.com
+bash hfd.sh MBZUAI/VideoGPT-plus_Training_Dataset
+```
+
+关于环境配置：
+
+torch 实验室 2.4.0+cu118
+
+需要单独下载 flash-attn （实验室版本2.6.3）
+
+其他 pip install -r requirements.txt 即可
+
+训练脚本位置 scripts/pool_full
+
+需要修改  export PYTHONPATH="/hhd2/wxc/VideoGPT-plus:$PYTHONPATH”
+
+pool 实现逻辑：
+
+```bash
+def divide_and_round(a, b):
+            result = a / b
+            if result < 1:
+                return 1
+            else:
+                return round(result)
+video_feature: shape=(divide_and_round(16, pool_level), divide_and_round(16, pool_level)))
+image_feature: shape=(divide_and_round(24, pool_level), divide_and_round(24, pool_level))
+```
+
+pool1 即 b=1 表示不进行 pool
+
+```python
+BASE_LLM_PATH=.cache/qwen2_5/1.5b_instruction 
+VISION_TOWER=.cache/InternVideo2-Stage2_1B-224p-f4
+IMAGE_VISION_TOWER=.cache/clip-vit-large-patch14-336
+PROJECTOR_TYPE=mlp2x_gelu
+PRETRAIN_VIDEO_MLP_PATH=results/pretrain/mlp2x_gelu_internvideo2/mm_projector.bin
+PRETRAIN_IMAGE_MLP_PATH=results/pretrain/mlp2x_gelu_clip_l14_336px/mm_projector.bin
+OUTPUT_DIR_PATH=results/pool_full/finetune_qwen1b_poolbranch_pool1
+```
+
+测试脚本位置 scripts/eval_pool_full
+
+【代码待修改，预计下午改完】
 
 
-**Video-based Generative Performance Benchmarking**
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/videogpt-integrating-image-and-video-encoders/video-based-generative-performance)](https://paperswithcode.com/sota/video-based-generative-performance?p=videogpt-integrating-image-and-video-encoders)
-
----
-
-## :loudspeaker: Latest Updates
-- **Jun-13-24**: VideoGPT+ paper, code, model, dataset and benchmark is released. :fire::fire:
----
-
-## VideoGPT+ Overview :bulb:
-
-VideoGPT+ integrates image and video encoders to leverage detailed spatial understanding and global temporal context, respectively. It processes videos in segments using adaptive pooling on features from both encoders, enhancing performance across various video benchmarks.
-
-<p align="center">
-  <img src="docs/images/block_diagram.png" alt="VideoGPT+ Architectural Overview">
-</p>
-
----
-
-## Contributions :trophy:
-
-- **VideoGPT+ Model**: We present VideoGPT+, the first video-conversation model that benefits from a dual-encoding scheme based on both image and video features. These complimentary sets of features offer rich spatiotemporal details for improved video understanding.
-- **VCG+ 112K Dataset**: Addressing the limitations of the existing VideoInstruct100K dataset, we develop VCG+ 112K with a novel semi-automatic annotation pipeline, offering dense video captions along with spatial understanding and reasoning-based QA pairs, further improving the model performance.
-- **VCGBench-Diverse Benchmark**: Recognizing the lack of diverse benchmarks for video-conversation tasks, we propose VCGBench-Diverse, which provides 4,354 human annotated QA pairs across 18 video categories to extensively evaluate the performance of a video-conversation model.
-
-<p align="center">
-  <img src="docs/images/intro_radar_plot.png" alt="Contributions" width="650">
-</p>
-
----
-
-## Video Annotation Pipeline (VCG+ 112K) :open_file_folder:
-Video-ChatGPT introduces the VideoInstruct100K dataset, which employs a semi-automatic annotation pipeline to generate 75K instruction-tuning QA pairs. To address the limitations of this annotation process, we present \ourdata~dataset developed through an improved annotation pipeline. Our approach improves the accuracy and quality of instruction tuning pairs by improving keyframe extraction, leveraging SoTA large multimodal models (LMMs) for detailed descriptions, and refining the instruction generation strategy.
-
-<p align="center">
-  <img src="docs/images/vcg120k_block_diagram.png" alt="Contributions">
-</p>
-
----
-## VCGBench-Diverse :mag:
-Recognizing the limited diversity in existing video conversation benchmarks, we introduce VCGBench-Diverse to comprehensively evaluate the generalization ability of video LMMs. While VCG-Bench provides an extensive evaluation protocol, it is limited to videos from the ActivityNet200 dataset. Our benchmark comprises a total of 877 videos, 18 broad video categories and 4,354 QA pairs, ensuring a robust evaluation framework.
-
-<p align="center">
-  <img src="docs/images/vcgbench_block_diag.png" alt="Contributions">
-</p>
-
----
 
 ## Installation :wrench:
 
