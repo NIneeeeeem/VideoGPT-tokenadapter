@@ -2,6 +2,7 @@ tokenizers
 sentencepiece
 shortuuid
 accelerate==0.27.2
+transformers
 peft
 bitsandbytes
 pydantic

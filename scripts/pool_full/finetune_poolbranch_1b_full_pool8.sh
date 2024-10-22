@@ -6,13 +6,18 @@ export DATASET_DIR=.cache/instruction_data
 # 设置PYTHONPATH环境变量,change here
 export PYTHONPATH="/hhd2/wxc/VideoGPT-plus:$PYTHONPATH"
 
+# qwen weight的位置，visual encoder的位置
 BASE_LLM_PATH=.cache/qwen2_5/1.5b_instruction
 VISION_TOWER=.cache/InternVideo2-Stage2_1B-224p-f4
 IMAGE_VISION_TOWER=.cache/clip-vit-large-patch14-336
 PROJECTOR_TYPE=mlp2x_gelu
+# 预训练的porjector权重，这部分权重待上传huggingface，其中:
+# PRETRAIN_IMAGE_MLP_PATH 是 image_mm_projector.bin
+# PRETRAIN_VIDEO_MLP_PATH 是 mm_projector.bin
 PRETRAIN_VIDEO_MLP_PATH=results/pretrain/mlp2x_gelu_internvideo2/mm_projector.bin
 PRETRAIN_IMAGE_MLP_PATH=results/pretrain/mlp2x_gelu_clip_l14_336px/mm_projector.bin
-OUTPUT_DIR_PATH=results/pool_full/finetune_qwen1b_poolbranch_pool4
+# 输出权重位置，用于后续测试
+OUTPUT_DIR_PATH=results/pool_full/finetune_qwen1b_poolbranch_pool8
 
 # pool_level 用于调节 pool 层，进而调整 visual token 数量
 deepspeed --include localhost:${GPUS} --master_port 35381 videogpt_plus/train/train.py \
