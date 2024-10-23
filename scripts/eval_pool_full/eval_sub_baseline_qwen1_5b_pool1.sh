@@ -1,6 +1,6 @@
 GPUS=$1
 # 设置PYTHONPATH环境变量
-export PYTHONPATH="/hhd2/wxc/VideoGPT-plus:$PYTHONPATH"
+export PYTHONPATH="./:$PYTHONPATH"
 
 # 运行Python脚本
 CUDA_VISIBLE_DEVICES=${GPUS} python eval/mvbench/inference/infer.py \

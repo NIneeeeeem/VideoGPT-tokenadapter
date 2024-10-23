@@ -1,9 +1,9 @@
 #!/bin/sh
 
 
-export DATASET_DIR=playground/data
+export DATASET_DIR=.cache/instruction_data
 
-BASE_LLM_PATH=microsoft/Phi-3-mini-4k-instruct
+BASE_LLM_PATH=.cache/qwen2_5/1.5b_instruction
 IMAGE_VISION_TOWER=openai/clip-vit-large-patch14-336
 PROJECTOR_TYPE=mlp2x_gelu
 OUTPUT_DIR_PATH=results/mlp2x_gelu_clip_l14_336px

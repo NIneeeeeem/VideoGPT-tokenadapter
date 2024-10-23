@@ -35,6 +35,14 @@ torch 实验室 2.4.0+cu118
 
 其他 pip install -r requirements.txt 即可
 
+Pretrain 脚本在
+
+scripts/pretrain_projector_image_encoder.sh
+
+scripts/pretrain_projector_video_encoder.sh
+
+已确定 VideoGPT+ 的bs设置为256
+
 训练脚本位置 scripts/pool_full
 
 需要修改  export PYTHONPATH="/hhd2/wxc/VideoGPT-plus:$PYTHONPATH”

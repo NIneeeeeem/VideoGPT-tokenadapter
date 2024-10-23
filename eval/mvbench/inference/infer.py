@@ -7,11 +7,11 @@ from videogpt_plus.mm_utils import tokenizer_image_token, get_model_name_from_pa
 from eval.mvbench.inference.ddp import *
 from torch.utils.data import DataLoader, DistributedSampler, SequentialSampler
 import traceback
-from calflops import calculate_flops
+# from calflops import calculate_flops
 # import debugpy
 # try:
 #     # 5678 is the default attach port in the VS Code debug configurations. Unless a host and port are specified, host defaults to 127.0.0.1
-#     debugpy.listen(("localhost", 9566))
+#     debugpy.listen(("localhost", 9567))
 #     print("Waiting for debugger attach")
 #     debugpy.wait_for_client()
 # except Exception as e:
@@ -74,6 +74,8 @@ def eval_model(args):
     image_processor = image_vision_tower.image_processor
 
     model = model.to("cuda")
+    model.config.pool_level = args.pool_level
+    model.config.output_attentions =  True
 
     dataset = EvalDatasetMvBench(args.question_dir, args.video_folder, image_processor,
                                  video_processor, mvbench_data_list)

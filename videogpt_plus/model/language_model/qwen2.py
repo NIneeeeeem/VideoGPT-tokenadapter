@@ -89,7 +89,7 @@ class VideoQWENForCausalLM(Qwen2ForCausalLM, VideoGPTPlusMetaForCausalLM):
             loss=loss,
             logits=logits,
             past_key_values=outputs.past_key_values,
-            hidden_states=outputs.hidden_states,
+            hidden_states=hidden_states,
             attentions=outputs.attentions,
         )
 

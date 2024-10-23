@@ -4,7 +4,7 @@ GPUS=$1
 export DATASET_DIR=.cache/instruction_data
 
 # 设置PYTHONPATH环境变量,change here
-export PYTHONPATH="/hhd2/wxc/VideoGPT-plus:$PYTHONPATH"
+export PYTHONPATH="./:$PYTHONPATH"
 
 # qwen weight的位置，visual encoder的位置
 BASE_LLM_PATH=.cache/qwen2_5/1.5b_instruction

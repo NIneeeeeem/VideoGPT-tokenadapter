@@ -18,6 +18,9 @@ fastapi
 einops
 einops-exts
 timm
-deepspeed==0.12.6
+deepspeed==0.14.4
 opencv-python
 imageio
+decord
+mmengine
+calflops

@@ -1,9 +1,8 @@
 #!/bin/sh
 
 
-export DATASET_DIR=playground/data
-
-BASE_LLM_PATH=microsoft/Phi-3-mini-4k-instruct
+export DATASET_DIR=.cache/instruction_data
+BASE_LLM_PATH=.cache/qwen2_5/1.5b_instruction
 VISION_TOWER=OpenGVLab/InternVideo2-Stage2_1B-224p-f4
 PROJECTOR_TYPE=mlp2x_gelu
 OUTPUT_DIR_PATH=results/mlp2x_gelu_internvideo2
