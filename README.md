@@ -1,5 +1,28 @@
 # ReadMe
 
+==========================================================
+
+预训练数据及脚本
+
++ 数据：在下载[instruction_tuning](https://huggingface.co/datasets/MBZUAI/VideoGPT-plus_Training_Dataset)数据时，包含了预训练的图片数据,在pretrain文件夹中，解压即可（这次没删数据）
+
++ 脚本
+```
+bash  scripts/pretrain_projector_image_encoder.sh
+
+bash  scripts/pretrain_projector_video_encoder.sh
+```
+```
+VideoGPT-plus
+├─ .cache
+│  ├─ instruction_data
+│     ├─ pretraining
+│        ├─ COCO
+│        ├─ cc3M
+```
+
+==========================================================
+
 EXP. VideoGPT+ 在不同pool上表现 llm使用 qwen2.5 1.5B/~~3B~~
 
 代码 [https://github.com/NIneeeeeem/VideoGPT-tokenadapter.git](https://github.com/NIneeeeeem/VideoGPT-tokenadapter.git)

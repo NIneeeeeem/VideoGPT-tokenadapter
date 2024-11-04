@@ -1,13 +1,14 @@
 #!/bin/sh
 
-
+GPUS=$1
+export PYTHONPATH="./:$PYTHONPATH"
 export DATASET_DIR=.cache/instruction_data
 BASE_LLM_PATH=.cache/qwen2_5/1.5b_instruction
 VISION_TOWER=OpenGVLab/InternVideo2-Stage2_1B-224p-f4
 PROJECTOR_TYPE=mlp2x_gelu
-OUTPUT_DIR_PATH=results/mlp2x_gelu_internvideo2
+OUTPUT_DIR_PATH=results/pretrain/mlp2x_gelu_internvideo2
 
-deepspeed videogpt_plus/train/pretrain.py \
+deepspeed --include localhost:${GPUS} --master_port 35381 videogpt_plus/train/pretrain.py \
 --deepspeed scripts/zero2.json \
 --tune_mm_mlp_adapter True \
 --model_name_or_path "$BASE_LLM_PATH" \

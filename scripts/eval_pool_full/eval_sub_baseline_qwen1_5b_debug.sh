@@ -8,4 +8,4 @@ CUDA_VISIBLE_DEVICES=${GPUS} python eval/mvbench/inference/infer.py \
     --output-dir json_result/debug \
     --model-base .cache/qwen2_5/1.5b_instruction \
     --conv-mode qwen2_cap \
-    --pool_level 1
+    --pool_level 2

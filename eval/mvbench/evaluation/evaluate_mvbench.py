@@ -68,7 +68,3 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir", type=str, default=".cache/VideoGPT-plus_Phi3-mini-4k/mvbench_eval")
     args = parser.parse_args()
     main(args)
-
-
-
-
