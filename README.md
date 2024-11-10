@@ -2,6 +2,15 @@
 
 ==========================================================
 
+Qwen2.5 - 3B 实验
+
+下载 [qwen3b](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct) (Qwen/Qwen2.5-3B-Instruct) 权重到 .cache/qwen2_5
+
+预训练的 projector 权重 已上传 [Wangxc1000/qwen2.5_3B_projectors](https://huggingface.co/Wangxc1000/qwen2.5_3B_projectors)
+
+
+==========================================================
+
 预训练数据及脚本
 
 + 数据：在下载[instruction_tuning](https://huggingface.co/datasets/MBZUAI/VideoGPT-plus_Training_Dataset)数据时，包含了预训练的图片数据,在pretrain文件夹中，解压即可（这次没删数据）
