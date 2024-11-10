@@ -1,12 +1,19 @@
 # ReadMe
 
-==========================================================
+========================== 11.10 ==========================
 
-Qwen2.5 - 3B 实验
+
++ Qwen2.5 - 3B 实验
 
 下载 [qwen3b](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct) (Qwen/Qwen2.5-3B-Instruct) 权重到 .cache/qwen2_5
 
-预训练的 projector 权重 已上传 [Wangxc1000/qwen2.5_3B_projectors](https://huggingface.co/Wangxc1000/qwen2.5_3B_projectors)
+预训练的 projector 权重 已上传 [Wangxc1000/qwen2.5_3B_projectors](https://huggingface.co/Wangxc1000/qwen2.5_3B_projectors) 
+
+训练脚本在 scripts/pool_full/finetune_poolbranch_3b_full_pool4.sh， 推理脚本在 scripts/eval_pool_full/eval_sub_baseline_qwen3b_pool4.sh
+
++ $MVBench_{token ~ aware}$
+
+bash mvbench_hard.sh 即可生成一个josn文件，其中 --pool2: path to pool2 results folder (文件夹里是很多json文件)  --output 一个json地址，用于保存最后结果。
 
 
 ==========================================================
