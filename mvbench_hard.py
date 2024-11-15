@@ -37,6 +37,16 @@ def check_ans(pred, gt):
 
     return flag
 
+def check_numbers(nums):
+    if nums[0] != 1:
+        return False
+    if nums[3] != 0:
+        return False
+    for i in range(1, 4):
+        if nums[i] < nums[i - 1]:
+            return False
+    return True
+
 
 def get_mvbench_hard(folder1, folder2, folder3, folder4, output):
     files1 = set(os.listdir(folder1))
@@ -65,18 +75,11 @@ def get_mvbench_hard(folder1, folder2, folder3, folder4, output):
         pred2 = json2['pred']
         pred3 = json3['pred']
         pred4 = json4['pred']
-        if check_ans(pred1, gt_answer) & check_ans(pred2, gt_answer) & check_ans(pred3, gt_answer) & check_ans(pred4, gt_answer):
+        
+        if check_numbers([check_ans(pred1, gt_answer),check_ans(pred2, gt_answer),check_ans(pred3, gt_answer),check_ans(pred4, gt_answer)]):
             continue
-        elif check_ans(pred4, gt_answer):
-            mvbench_hard[filename] = "pool16"
-        elif check_ans(pred3, gt_answer):
-            mvbench_hard[filename] = "pool8"
-        elif check_ans(pred2, gt_answer):
-            mvbench_hard[filename] = "pool4"
-        elif check_ans(pred1, gt_answer):
-            mvbench_hard[filename] = "pool2"
         else:
-            mvbench_hard[filename] = "None"
+            mvbench_hard[filename] = [check_ans(pred1, gt_answer),check_ans(pred2, gt_answer),check_ans(pred3, gt_answer),check_ans(pred4, gt_answer)]
 
     with open(output, 'w') as out_file:
         json.dump(mvbench_hard, out_file, ensure_ascii=False, indent=4)
