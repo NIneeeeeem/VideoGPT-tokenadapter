@@ -43,7 +43,7 @@ def check_numbers(nums):
         return False
     if nums[3] != 0:
         return False
-    for i in range(1, 4):
+    for i in range(1, 3):
         if nums[i] < nums[i - 1]:
             return False
     return True
@@ -80,7 +80,7 @@ def get_mvbench_hard(folder1, folder2, folder3, folder4,ldp_folder, output):
         pred4 = json4['pred']
         ldp_pred = ldp_json['pred']
         
-        if check_numbers([check_ans(pred1, gt_answer),check_ans(pred2, gt_answer),check_ans(pred3, gt_answer),check_ans(pred4, gt_answer)]):
+        if not check_numbers([check_ans(pred1, gt_answer),check_ans(pred2, gt_answer),check_ans(pred3, gt_answer),check_ans(pred4, gt_answer)]):
             continue
         else:
             mvbench_hard[filename] = [check_ans(pred1, gt_answer),check_ans(pred2, gt_answer),check_ans(pred3, gt_answer),check_ans(pred4, gt_answer),check_ans(ldp_pred, gt_answer)]
