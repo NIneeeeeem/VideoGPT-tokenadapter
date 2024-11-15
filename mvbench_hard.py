@@ -9,6 +9,7 @@ def parse_args():
     parser.add_argument('--pool4', required=True, help='path_to_pool4_folder')
     parser.add_argument('--pool8', required=True, help='path_to_pool8_folder')
     parser.add_argument('--pool16', required=True, help='path_to_pool16_folder')
+    parser.add_argument('--ldp', required=True, help='path_to_ldp_folder')
     parser.add_argument('--output', required=True, help='out_path') # .json
     return parser.parse_args()
 
@@ -98,4 +99,4 @@ def get_mvbench_hard(folder1, folder2, folder3, folder4,ldp_folder, output):
 
 if __name__ == '__main__':
     args = parse_args()
-    get_mvbench_hard(args.pool2, args.pool4, args.pool8, args.pool16, args.output)
+    get_mvbench_hard(args.pool2, args.pool4, args.pool8, args.pool16, args.ldp, args.output)
