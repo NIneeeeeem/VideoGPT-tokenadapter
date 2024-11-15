@@ -48,7 +48,7 @@ def check_numbers(nums):
     return True
 
 
-def get_mvbench_hard(folder1, folder2, folder3, folder4, output):
+def get_mvbench_hard(folder1, folder2, folder3, folder4,ldp_folder, output):
     files1 = set(os.listdir(folder1))
     files2 = set(os.listdir(folder2))
     files3 = set(os.listdir(folder3))
@@ -58,32 +58,43 @@ def get_mvbench_hard(folder1, folder2, folder3, folder4, output):
     assert len(common_files)==4000 # 完整性校验
 
     mvbench_hard = {}
-
+    right = [0, 0, 0, 0, 0]
     for filename in tqdm(common_files):
         file1_path = os.path.join(folder1, filename)
         file2_path = os.path.join(folder2, filename)
         file3_path = os.path.join(folder3, filename)
         file4_path = os.path.join(folder4, filename)
+        ldp_file_path = os.path.join(ldp_folder, filename)
 
         json1 = load_json(file1_path)
         json2 = load_json(file2_path)
         json3 = load_json(file3_path)
         json4 = load_json(file4_path)
+        ldp_json = load_json(ldp_file_path)
 
         gt_answer = json1['A']
         pred1 = json1['pred']
         pred2 = json2['pred']
         pred3 = json3['pred']
         pred4 = json4['pred']
+        ldp_pred = ldp_json['pred']
         
         if check_numbers([check_ans(pred1, gt_answer),check_ans(pred2, gt_answer),check_ans(pred3, gt_answer),check_ans(pred4, gt_answer)]):
             continue
         else:
-            mvbench_hard[filename] = [check_ans(pred1, gt_answer),check_ans(pred2, gt_answer),check_ans(pred3, gt_answer),check_ans(pred4, gt_answer)]
-
+            mvbench_hard[filename] = [check_ans(pred1, gt_answer),check_ans(pred2, gt_answer),check_ans(pred3, gt_answer),check_ans(pred4, gt_answer),check_ans(ldp_pred, gt_answer)]
+            right[0] += check_ans(pred1, gt_answer)
+            right[1] += check_ans(pred2, gt_answer)
+            right[2] += check_ans(pred3, gt_answer)
+            right[3] += check_ans(pred4, gt_answer)
+            right[4] += check_ans(ldp_pred, gt_answer)
+    for i in right:
+        print(i/len(mvbench_hard))
     with open(output, 'w') as out_file:
         json.dump(mvbench_hard, out_file, ensure_ascii=False, indent=4)
     print(f"Savee to {output}")
+
+
 
 if __name__ == '__main__':
     args = parse_args()
