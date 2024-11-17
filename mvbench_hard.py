@@ -43,8 +43,8 @@ def check_numbers(nums):
         return False
     if nums[3] != 0:
         return False
-    for i in range(1, 3):
-        if nums[i] < nums[i - 1]:
+    for i in range(1, 4):
+        if nums[i] >= nums[i - 1]:
             return False
     return True
 
