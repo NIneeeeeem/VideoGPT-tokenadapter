@@ -72,7 +72,7 @@
 - Training scripts are located in `scripts/pool_full`
 - Set Python path before running:
   ```bash
-  export PYTHONPATH="/hhd2/wxc/VideoGPT-plus:$PYTHONPATH"
+  export PYTHONPATH="./VideoGPT-plus:$PYTHONPATH"
   ```
 
 ## Pooling Logic
